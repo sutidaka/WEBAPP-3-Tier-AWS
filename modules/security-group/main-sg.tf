@@ -23,6 +23,32 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_bastion_ipv4" {
 }
 
 
+# SG สำหรับ Nat-instance (Install On EC2)
+resource "aws_security_group" "nat_instance" {
+  name = "sg_nat_instance"
+  description = "Security Group for NAT Instance"
+  vpc_id = var.vpc_id
+  tags = {
+    Name = "nat-instance-sg"
+  }
+}
+resource "aws_vpc_security_group_ingress_rule" "nat_ssh" {
+  security_group_id = aws_security_group.nat_instance.id
+  cidr_ipv4 = var.admin_ip
+  from_port = 22
+  to_port = 22
+  ip_protocol = "tcp"
+  description = "Allow SSH from admin IP"
+}
+# NAT จะ forward traffic อย่างเดียว ไม่จำเป็นต้องเปิด ingress อื่นๆ
+resource "aws_vpc_security_group_egress_rule" "nat_all_outbound" {
+  security_group_id = aws_security_group.nat_instance.id
+  cidr_ipv4 = "0.0.0.0/0"
+  ip_protocol = "-1"
+  description = "Allow all outbound traffic"
+}
+
+
 # SG สำหรับ ALB= Application Load Balance
 resource "aws_security_group" "alb" {
   name = "sg_web_alb"
@@ -112,3 +138,5 @@ resource "aws_vpc_security_group_egress_rule" "db_all_out" {
   cidr_ipv4         = "0.0.0.0/0"
   description       = "Allow all outbound traffic"
 }
+
+

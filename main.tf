@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 6.0"
+       version = "~> 4.0"
     }
   }
   required_version = ">= 1.3.0"
@@ -35,19 +35,21 @@ module "subnet" {
 
 # --- Security Groups ---
 module "security_group" {
-  source  = "./modules/security-group"
-  vpc_id  = module.vpc.vpc_id
+  source   = "./modules/security-group"
+  vpc_id   = module.vpc.vpc_id
   admin_ip = var.admin_ip
 }
 
 # --- NAT Instance ---
 module "nat_instance" {
-  source        = "./modules/ec2/nat-instance"
-  vpc_id        = module.vpc.vpc_id
-  subnet_id     = module.subnet.public_subnet_ids[0]
-  sg_id         = module.security_group.sg_nat_id
-  instance_type = var.nat_instance_type
-  key_name      = var.key_name
+  source            = "./modules/ec2/nat_instance"
+  project_name      = var.project_name
+  ami_id            = var.ami_id
+  nat_instance_type = var.nat_instance_type
+  subnet_id         = module.subnet.public_subnet_ids[0]
+  key_name          = var.key_name
+  security_group_id = module.security_group.sg_nat_instance_id
+  tags              = var.tags
 }
 
 # --- Bastion Host ---
