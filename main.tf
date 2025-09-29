@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-       version = "~> 4.0"
+      version = "~> 4.0"
     }
   }
   required_version = ">= 1.3.0"
@@ -54,14 +54,14 @@ module "nat_instance" {
 
 # --- Bastion Host ---
 module "bastion" {
-  source         = "./modules/ec2/bastion"
-  project_name   = var.project_name
-  ami_id         = var.ami_id
-  instance_type  = var.bastion_instance_type
-  subnet_id      = module.subnet.public_subnet_ids[0]
-  sg_id          = module.security_group.sg_bastion_id
-  key_name       = var.key_name
-  tags           = var.tags
+  source        = "./modules/ec2/bastion"
+  project_name  = var.project_name
+  ami_id        = var.ami_id
+  instance_type = var.bastion_instance_type
+  subnet_id     = module.subnet.public_subnet_ids[0]
+  sg_id         = module.security_group.sg_bastion_id
+  key_name      = var.key_name
+  tags          = var.tags
 }
 
 

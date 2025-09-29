@@ -4,11 +4,19 @@ resource "aws_instance" "nat_instance" {
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   key_name                    = var.key_name
-  source_dest_check = false
+  source_dest_check           = false
+  vpc_security_group_ids = [var.security_group_id]
 
-
-  # Security group ของ NAT instance (ควรสร้างไว้ใน module sg แล้วส่งเข้ามา)
-  vpc_security_group_ids = [var.aws_security_group.nat_instance.id]
+# Script forward traffic nat-instance 
+  user_data = <<-EOF
+              #!/bin/bash
+              sysctl -w net.ipv4.ip_forward=1
+              echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+              iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+              yum install -y iptables-services
+              systemctl start iptables
+              systemctl enable iptables
+              EOF
 
   # Tagging เพื่อการจัดการง่าย
   tags = merge(
@@ -19,10 +27,6 @@ resource "aws_instance" "nat_instance" {
   )
 }
 
-# เพิ่มการตั้งค่าให้ instance นี้ forward traffic ได้
-resource "aws_ec2_instance_connect_endpoint" "nat_connect" {
-  subnet_id = var.subnet_id
-}
 
 # Elastic IP สำหรับ NAT Instance
 resource "aws_eip" "nat_eip" {

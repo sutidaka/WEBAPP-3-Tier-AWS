@@ -14,7 +14,7 @@ resource "aws_instance" "bastion" {
   )
 }
 
-# Optional: EC2 Instance Connect Endpoint
-resource "aws_ec2_instance_connect_endpoint" "bastion_connect" {
-  subnet_id = var.subnet_id
-}
+# # Optional: EC2 Instance Connect Endpoint
+# resource "aws_ec2_instance_connect_endpoint" "bastion_connect" {
+#   subnet_id = var.subnet_id
+# }

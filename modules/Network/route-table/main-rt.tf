@@ -26,15 +26,15 @@ resource "aws_route_table_association" "public_subnet" {
 resource "aws_route_table" "private" {
   vpc_id = var.vpc_id
 
-    tags = {
-      Name = "${var.project_name}-private-rt"
-    }
+  tags = {
+    Name = "${var.project_name}-private-rt"
+  }
 }
 
 resource "aws_route" "private_nat_access" {
   route_table_id         = aws_route_table.private.id
   destination_cidr_block = "0.0.0.0/0"
-  instance_id            = var.nat_instance_id   # ใช้ instance_id ของ NAT Instance
+  instance_id            = var.nat_instance_id # ใช้ instance_id ของ NAT Instance
 }
 
 resource "aws_route_table_association" "private_subnet" {

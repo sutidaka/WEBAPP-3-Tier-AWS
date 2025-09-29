@@ -3,7 +3,7 @@ output "nat_instance_id" {
   value       = aws_instance.nat_instance.id
 }
 
-output "nat_public_ip" {
+output "public_ip" {
   description = "Public IP ของ NAT Instance"
   value       = aws_eip.nat_eip.public_ip
 }

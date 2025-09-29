@@ -13,46 +13,46 @@ resource "aws_vpc_security_group_ingress_rule" "allow_bastion_ssh_ipv4" {
   from_port         = 22
   to_port           = 22
   ip_protocol       = "tcp"
-  description = "Allow SSH From my ip "
+  description       = "Allow SSH From my ip "
 }
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_bastion_ipv4" {
   security_group_id = aws_security_group.bastion.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
-  description = "Allow all outbound Traffic"
+  description       = "Allow all outbound Traffic"
 }
 
 
 # SG สำหรับ Nat-instance (Install On EC2)
 resource "aws_security_group" "nat_instance" {
-  name = "sg_nat_instance"
+  name        = "sg_nat_instance"
   description = "Security Group for NAT Instance"
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
   tags = {
     Name = "nat-instance-sg"
   }
 }
 resource "aws_vpc_security_group_ingress_rule" "nat_ssh" {
   security_group_id = aws_security_group.nat_instance.id
-  cidr_ipv4 = var.admin_ip
-  from_port = 22
-  to_port = 22
-  ip_protocol = "tcp"
-  description = "Allow SSH from admin IP"
+  cidr_ipv4         = var.admin_ip
+  from_port         = 22
+  to_port           = 22
+  ip_protocol       = "tcp"
+  description       = "Allow SSH from admin IP"
 }
 # NAT จะ forward traffic อย่างเดียว ไม่จำเป็นต้องเปิด ingress อื่นๆ
 resource "aws_vpc_security_group_egress_rule" "nat_all_outbound" {
   security_group_id = aws_security_group.nat_instance.id
-  cidr_ipv4 = "0.0.0.0/0"
-  ip_protocol = "-1"
-  description = "Allow all outbound traffic"
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+  description       = "Allow all outbound traffic"
 }
 
 
 # SG สำหรับ ALB= Application Load Balance
 resource "aws_security_group" "alb" {
-  name = "sg_web_alb"
-  vpc_id = var.vpc_id
+  name        = "sg_web_alb"
+  vpc_id      = var.vpc_id
   description = "Allow inbound HTTP 80 from the Internet to the ALB"
   tags = {
     Name = "sg_alb"
@@ -60,11 +60,11 @@ resource "aws_security_group" "alb" {
 }
 resource "aws_vpc_security_group_ingress_rule" "allow_web_for_alb" {
   security_group_id = aws_security_group.alb.id
-  cidr_ipv4 = "0.0.0.0/0"
-  from_port = 80
-  to_port = 80
-  ip_protocol = "tcp"
-  description = "Allow HTTP from Internet"
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  description       = "Allow HTTP from Internet"
 }
 resource "aws_vpc_security_group_egress_rule" "alb_all_out" {
   security_group_id = aws_security_group.alb.id
@@ -76,8 +76,8 @@ resource "aws_vpc_security_group_egress_rule" "alb_all_out" {
 
 # SG สำหรับ Instance EC2
 resource "aws_security_group" "web_instance" {
-  name = "sg_web_instance"
-  vpc_id = var.vpc_id
+  name        = "sg_web_instance"
+  vpc_id      = var.vpc_id
   description = "Security group for Web EC2 instance"
   tags = {
     Name = "sg_instance"
@@ -148,20 +148,20 @@ resource "aws_vpc_security_group_egress_rule" "app_all_out" {
 
 # SG สำหรับ Database RDS
 resource "aws_security_group" "Database" {
-  name = "sg_database"
-  vpc_id = var.vpc.id
+  name        = "sg_database"
+  vpc_id      = var.vpc_id
   description = "Security Group for Database"
   tags = {
     Name = "sg_database"
   }
 }
 resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
-  security_group_id = aws_security_group.Database.id
-  from_port = 5432
-  to_port = 5432
-  ip_protocol = "tcp"
+  security_group_id            = aws_security_group.Database.id
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.app_instance.id
-  description = "Allow DB access from App Server EC2"
+  description                  = "Allow DB access from App Server EC2"
 }
 resource "aws_vpc_security_group_ingress_rule" "db_ssh_from_bastion" {
   security_group_id            = aws_security_group.Database.id
