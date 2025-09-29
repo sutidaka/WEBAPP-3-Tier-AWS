@@ -54,9 +54,14 @@ module "nat_instance" {
 
 # --- Bastion Host ---
 module "bastion" {
-  source        = "./modules/ec2/bastion"
-  subnet_id     = module.subnet.public_subnet_ids[0]
-  sg_id         = module.security_group.sg_bastion_id
-  instance_type = var.bastion_instance_type
-  key_name      = var.key_name
+  source         = "./modules/ec2/bastion"
+  project_name   = var.project_name
+  ami_id         = var.ami_id
+  instance_type  = var.bastion_instance_type
+  subnet_id      = module.subnet.public_subnet_ids[0]
+  sg_id          = module.security_group.sg_bastion_id
+  key_name       = var.key_name
+  tags           = var.tags
 }
+
+

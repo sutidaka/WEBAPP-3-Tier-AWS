@@ -4,6 +4,8 @@ resource "aws_instance" "nat_instance" {
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   key_name                    = var.key_name
+  source_dest_check = false
+
 
   # Security group ของ NAT instance (ควรสร้างไว้ใน module sg แล้วส่งเข้ามา)
   vpc_security_group_ids = [var.aws_security_group.nat_instance.id]
@@ -25,7 +27,7 @@ resource "aws_ec2_instance_connect_endpoint" "nat_connect" {
 # Elastic IP สำหรับ NAT Instance
 resource "aws_eip" "nat_eip" {
   instance = aws_instance.nat_instance.id
-  vpc = true 
+  # vpc = true 
 
   tags = {
     Name = "${var.project_name}-nat-eip"

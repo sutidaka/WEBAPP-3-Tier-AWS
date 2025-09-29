@@ -13,6 +13,12 @@ output "sg_web_instance_id"{
   value       = aws_security_group.web_instance.id
 }
 
+output "sg_app_instance_id"{
+  description = "ID of the APP EC2 Security Group"
+  value       = aws_security_group.app_instance.id
+}
+
+
 output "sg_database_id"{
   description = "ID of the Database EC2 Security Group"
   value       = aws_security_group.Database.id

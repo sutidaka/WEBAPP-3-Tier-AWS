@@ -107,6 +107,45 @@ resource "aws_vpc_security_group_egress_rule" "web_all_out" {
 }
 
 
+# SG สำหรับ App EC2
+resource "aws_security_group" "app_instance" {
+  name        = "sg_app_instance"
+  description = "Security group for App EC2 instance"
+  vpc_id      = var.vpc_id
+  tags = {
+    Name = "sg_app_instance"
+  }
+}
+
+# Allow HTTP (API) จาก Web EC2
+resource "aws_vpc_security_group_ingress_rule" "app_http_from_web" {
+  security_group_id            = aws_security_group.app_instance.id
+  from_port                    = 8080
+  to_port                      = 8080
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.web_instance.id
+  description                  = "Allow HTTP (8080) from Web EC2"
+}
+
+
+# SSH จาก Bastion
+resource "aws_vpc_security_group_ingress_rule" "app_ssh_from_bastion" {
+  security_group_id            = aws_security_group.app_instance.id
+  from_port                    = 22
+  to_port                      = 22
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.bastion.id
+  description                  = "Allow SSH from Bastion"
+}
+
+# Outbound ปกติ
+resource "aws_vpc_security_group_egress_rule" "app_all_out" {
+  security_group_id = aws_security_group.app_instance.id
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+  description       = "Allow all outbound"
+}
+
 # SG สำหรับ Database RDS
 resource "aws_security_group" "Database" {
   name = "sg_database"
@@ -116,13 +155,13 @@ resource "aws_security_group" "Database" {
     Name = "sg_database"
   }
 }
-resource "aws_vpc_security_group_ingress_rule" "db_from_web" {
+resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
   security_group_id = aws_security_group.Database.id
   from_port = 5432
   to_port = 5432
   ip_protocol = "tcp"
-  referenced_security_group_id = aws_security_group.web_instance.id
-  description = "Allow DB access from Web Server EC2"
+  referenced_security_group_id = aws_security_group.app_instance.id
+  description = "Allow DB access from App Server EC2"
 }
 resource "aws_vpc_security_group_ingress_rule" "db_ssh_from_bastion" {
   security_group_id            = aws_security_group.Database.id
@@ -138,5 +177,3 @@ resource "aws_vpc_security_group_egress_rule" "db_all_out" {
   cidr_ipv4         = "0.0.0.0/0"
   description       = "Allow all outbound traffic"
 }
-
-
