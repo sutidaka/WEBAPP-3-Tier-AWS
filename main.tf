@@ -79,14 +79,14 @@ module "bastion" {
 # --- Internet Gateway ---#
 
 module "igw" {
-  source = "./modules/network/igw"
+  source = "./modules/network/internet-gateway"
   vpc_id = module.vpc.vpc_id
   project_name = var.project_name
 }
 
   # --- Routing-Table ---#
 module "route_table" {
-  source             = "./modules/network/routing-table"
+  source             = "./modules/network/route-table"
   vpc_id             = module.vpc.vpc_id
   project_name       = var.project_name
   igw_id             = module.igw.igw_id
