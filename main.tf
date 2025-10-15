@@ -12,6 +12,17 @@ provider "aws" {
   region = var.aws_region
 }
 
+#  ดึง Public IP ปัจจุบันของเครื่อง (Dynamic)
+data "http" "my_ip" {
+  url = "https://ipv4.icanhazip.com"
+}
+
+locals {
+  admin_ip = "${trimspace(data.http.my_ip.body)}/32"
+}
+
+
+
 # ดึง AZ ที่พร้อมใช้งาน
 data "aws_availability_zones" "available" {
   state = "available"
@@ -37,7 +48,7 @@ module "subnet" {
 module "security_group" {
   source   = "./modules/security-group"
   vpc_id   = module.vpc.vpc_id
-  admin_ip = var.admin_ip
+  admin_ip = local.admin_ip
 }
 
 # --- NAT Instance ---

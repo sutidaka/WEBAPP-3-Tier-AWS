@@ -25,13 +25,13 @@ variable "private_subnet_cidrs" {
   type        = list(string)
 }
 
-variable "admin_ip" {
-  description = "IP Access SSH to bastion"
-  type        = string
-}
+# variable "admin_ip" {
+#   description = "Your current public IP address for SSH access"
+#   type        = string
+# }
 
 variable "key_name" {
-  description = "key access "
+  description = "key access The name of the EC2 key pair "
   type        = string
 }
 
