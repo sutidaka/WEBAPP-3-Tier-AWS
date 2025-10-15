@@ -18,9 +18,8 @@ data "http" "my_ip" {
 }
 
 locals {
-  admin_ip = "${trimspace(data.http.my_ip.body)}/32"
+  admin_ip = trimspace(data.http.my_ip.response_body) + "/32"
 }
-
 
 
 # ดึง AZ ที่พร้อมใช้งาน
