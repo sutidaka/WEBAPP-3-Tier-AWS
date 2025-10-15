@@ -41,7 +41,7 @@ module "subnet" {
   vpc_id               = module.vpc.vpc_id
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
-  availability_zones   = data.aws_availability_zones.available.names
+  availability_zones   = var.availability_zones
 }
 
 # --- Security Groups ---
@@ -76,3 +76,21 @@ module "bastion" {
 }
 
 
+# --- Internet Gateway ---#
+
+module "igw" {
+  source = "./modules/network/igw"
+  vpc_id = module.vpc.vpc_id
+  project_name = var.project_name
+}
+
+  # --- Routing-Table ---#
+module "route_table" {
+  source             = "./modules/network/routing-table"
+  vpc_id             = module.vpc.vpc_id
+  project_name       = var.project_name
+  igw_id             = module.igw.igw_id
+  nat_instance_id    = module.nat_instance.nat_instance_id
+  public_subnet_ids  = module.subnet.public_subnet_ids
+  private_subnet_ids = module.subnet.private_subnet_ids
+}

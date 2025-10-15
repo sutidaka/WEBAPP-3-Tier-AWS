@@ -1,3 +1,7 @@
+# -------------------------
+# Public Route Table (IGW-TO-Internet)
+# -------------------------
+
 resource "aws_route_table" "public" {
   vpc_id = var.vpc_id
 

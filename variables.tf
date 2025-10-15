@@ -5,6 +5,12 @@ variable "aws_region" {
   type        = string
 }
 
+variable "availability_zones" {
+  description = "List of Availability Zones to use (for single-AZ lab)"
+  type        = list(string)
+}
+
+
 variable "vpc_name" {
   description = "Name of the VPC"
   type        = string
@@ -59,3 +65,4 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
