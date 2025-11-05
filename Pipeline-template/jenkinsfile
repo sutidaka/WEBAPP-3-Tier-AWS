@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+
+    environment {
+        EC2_IP = "10.0.2.195"  // <== เปลี่ยนเป็น IP EC2 ที่รัน Prometheus
+        SSH_CRED_ID = "monitoring"
+        DEST_PATH = "/opt/monitoring/prometheus"
+        LOCAL_PATH = "docker-compose/prometheus"
+    }
+
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git branch: 'main', url: 'https://github.com/yourname/webapp-3-tier-aws.git'
+            }
+        }
+
+        stage('Create Remote Directory') {
+            steps {
+                sshagent(credentials: [SSH_CRED_ID]) {
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ec2-user@${EC2_IP} 'mkdir -p ${DEST_PATH}'
+                    """
+                }
+            }
+        }
+
+        stage('Copy Prometheus Files') {
+            steps {
+                sshagent(credentials: [SSH_CRED_ID]) {
+                    sh """
+                    scp -o StrictHostKeyChecking=no ${LOCAL_PATH}/docker-compose.yml ec2-user@${EC2_IP}:${DEST_PATH}/
+                    scp -o StrictHostKeyChecking=no ${LOCAL_PATH}/prometheus.yml ec2-user@${EC2_IP}:${DEST_PATH}/
+                    """
+                }
+            }
+        }
+
+        stage('Deploy Prometheus') {
+            steps {
+                sshagent(credentials: [SSH_CRED_ID]) {
+                    sh """
+                    ssh ec2-user@${EC2_IP} '
+                      cd ${DEST_PATH} &&
+                      docker compose down &&
+                      docker compose up -d
+                    '
+                    """
+                }
+            }
+        }
+
+        stage('Verify Service') {
+            steps {
+                sshagent(credentials: [SSH_CRED_ID]) {
+                    sh """
+                    ssh ec2-user@${EC2_IP} 'docker ps'
+                    """
+                }
+            }
+        }
+    }
+}
