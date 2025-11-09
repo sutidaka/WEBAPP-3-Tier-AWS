@@ -3,5 +3,5 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://<prometheus-ec2-private-ip>:9090
+    url: http://10.0.2.195:9090
     isDefault: true
