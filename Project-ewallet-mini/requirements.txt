@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+python-jose[cryptography]   # JWT
+passlib[bcrypt]             # password hashing
+sqlalchemy
+psycopg2-binary             # connect PostgreSQL
+python-dotenv               # load .env
