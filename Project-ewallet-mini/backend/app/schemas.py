@@ -5,12 +5,12 @@ from typing import Optional
 # ====== User Models ======
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
-    password: str = Field(..., min_length=6)
+    password: str = Field(..., min_length=4, max_length=72)   # bcrypt limit
 
 
 class UserLogin(BaseModel):
     username: str
-    password: str
+    password: str = Field(..., max_length=72)  # bcrypt limit
 
 
 class UserResponse(BaseModel):
