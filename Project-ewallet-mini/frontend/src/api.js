@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const API = import.meta.env.VITE_API_URL;
 
 export const login = async (username, password) => {
@@ -24,3 +25,12 @@ export const getBalance = async (token) => {
   });
   return res.json();
 };
+=======
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "http://127.0.0.1:8000",
+});
+
+export default api;
+>>>>>>> 4f4d92a (Add project-ewallet-mini as normal folder)
