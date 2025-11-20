@@ -1,36 +1,38 @@
-<<<<<<< HEAD
-const API = import.meta.env.VITE_API_URL;
-
-export const login = async (username, password) => {
-  const res = await fetch(`${API}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  });
-  return res.json();
-};
-
-export const register = async (username, password) => {
-  const res = await fetch(`${API}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  });
-  return res.json();
-};
-
-export const getBalance = async (token) => {
-  const res = await fetch(`${API}/wallet/balance`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  return res.json();
-};
-=======
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-});
+const API_URL = "http://localhost:8000"; // ⭐ แก้เป็น URL backend จริงของคุณ
 
-export default api;
->>>>>>> 4f4d92a (Add project-ewallet-mini as normal folder)
+export async function login(username, password) {
+  try {
+    const res = await axios.post(`${API_URL}/auth/login`, {
+      username,
+      password,
+    });
+    return res.data;
+  } catch (err) {
+    return {};
+  }
+}
+
+export async function register(username, password) {
+  try {
+    const res = await axios.post(`${API_URL}/auth/register`, {
+      username,
+      password,
+    });
+    return res.data;
+  } catch (err) {
+    return {};
+  }
+}
+
+export async function getBalance(token) {
+  try {
+    const res = await axios.get(`${API_URL}/wallet/balance`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (err) {
+    return {};
+  }
+}
