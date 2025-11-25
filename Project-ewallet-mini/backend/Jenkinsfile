@@ -1,0 +1,69 @@
+pipeline {
+  agent any
+
+  environment {
+    AWS_REGION = 'ap-southeast-1'
+    ECR_REPO = 'ewallet-backend'
+    IMAGE_TAG = 'latest'
+    AWS_ACCOUNT_ID = '314146333464'   
+    REMOTE_HOST = '10.0.2.216'
+    REMOTE_PATH = '/opt/backend'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: 'main', url: 'https://github.com/sutidaka/WEBAPP-3-Tier-AWS.git'
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        dir('Project-ewallet-mini/backend') {
+          sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+        }
+      }
+    }
+
+    stage('Tag & Push to ECR') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'aws-ecr', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh '''
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            aws configure set default.region $AWS_REGION
+
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+            docker tag $ECR_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+            docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+          '''
+        }
+      }
+    }
+
+    stage('Deploy to EC2') {
+      steps {
+        sshagent(['App-tier']) {
+          sh """
+            ssh -o StrictHostKeyChecking=no ec2-user@$REMOTE_HOST '
+              cd $REMOTE_PATH &&
+              aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com &&
+              docker-compose pull &&
+              docker-compose up -d
+            '
+          """
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo '✅ Deploy Success!'
+    }
+    failure {
+      echo '❌ Deploy Failed'
+    }
+  }
+}
