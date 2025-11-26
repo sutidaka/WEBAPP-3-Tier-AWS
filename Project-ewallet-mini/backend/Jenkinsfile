@@ -8,9 +8,13 @@ pipeline {
     AWS_ACCOUNT_ID = '314146333464'   
     REMOTE_HOST = '10.0.2.216'
     REMOTE_PATH = '/opt/backend'
+
+    // แก้ปัญหา ".dkr" error โดยสร้างเป็น URL string
+    ECR_URL = "314146333464.dkr.ecr.ap-southeast-1.amazonaws.com"
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         git branch: 'main', url: 'https://github.com/sutidaka/WEBAPP-3-Tier-AWS.git'
@@ -20,7 +24,9 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         dir('Project-ewallet-mini/backend') {
-          sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+          sh """
+            docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+          """
         }
       }
     }
@@ -28,16 +34,21 @@ pipeline {
     stage('Tag & Push to ECR') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'jenkins-ecr-user1', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-          sh '''
-            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-            aws configure set default.region $AWS_REGION
+          sh """
+            aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+            aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+            aws configure set default.region ${AWS_REGION}
 
-            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+            # login
+            aws ecr get-login-password --region ${AWS_REGION} \
+              | docker login --username AWS --password-stdin ${ECR_URL}
 
-            docker tag $ECR_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-            docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-          '''
+            # tag image
+            docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_URL}/${ECR_REPO}:${IMAGE_TAG}
+
+            # push image
+            docker push ${ECR_URL}/${ECR_REPO}:${IMAGE_TAG}
+          """
         }
       }
     }
@@ -46,9 +57,10 @@ pipeline {
       steps {
         sshagent(['App-tier']) {
           sh """
-            ssh -o StrictHostKeyChecking=no ec2-user@$REMOTE_HOST '
-              cd $REMOTE_PATH &&
-              aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com &&
+            ssh -o StrictHostKeyChecking=no ec2-user@${REMOTE_HOST} '
+              cd ${REMOTE_PATH} &&
+              aws ecr get-login-password --region ${AWS_REGION} \
+                | docker login --username AWS --password-stdin ${ECR_URL} &&
               docker-compose pull &&
               docker-compose up -d
             '
