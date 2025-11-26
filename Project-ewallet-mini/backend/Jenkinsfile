@@ -57,19 +57,21 @@ pipeline {
     stage('Deploy to EC2') {
         steps {
             sshagent(['App-tier']) {
-                sh """
-                    ssh -o StrictHostKeyChecking=no \
+            sh """
+                ssh -o StrictHostKeyChecking=no \
                     -o ProxyJump=ec2-user@10.0.1.8 \
                     ec2-user@${REMOTE_HOST} '
-                        cd ${REMOTE_PATH} &&
-                        aws ecr get-login-password --region ${AWS_REGION} \
+                    cd ${REMOTE_PATH} &&
+                    aws ecr get-login-password --region ${AWS_REGION} \
                         | docker login --username AWS --password-stdin ${ECR_URL} &&
                     docker-compose pull &&
-                    docker-compose up -d 
-                """
+                    docker-compose up -d
+                    '
+            """
             }
         }
-    }
+        }
+
   }
 
   post {
