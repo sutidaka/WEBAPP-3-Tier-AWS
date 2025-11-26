@@ -6,6 +6,7 @@ pipeline {
     ECR_REPO = 'ewallet-backend'
     IMAGE_TAG = 'latest'
     AWS_ACCOUNT_ID = '314146333464'   
+    BASTION_HOST = "10.0.1.8"
     REMOTE_HOST = '10.0.2.216'
     REMOTE_PATH = '/opt/backend'
 
