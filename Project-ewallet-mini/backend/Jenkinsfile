@@ -58,13 +58,18 @@ pipeline {
   steps {
     sshagent(['App-tier']) {
       sh """
-        ssh -o StrictHostKeyChecking=no ec2-user@${REMOTE_HOST} << 'EOF'
-          cd ${REMOTE_PATH}
-          aws ecr get-login-password --region ${AWS_REGION} \
+        ssh -o StrictHostKeyChecking=no ec2-user@10.0.2.216 << EOF
+        export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+        export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+        export AWS_DEFAULT_REGION=${AWS_REGION}
+
+        cd ${REMOTE_PATH}
+        aws ecr get-login-password --region ${AWS_REGION} \
             | docker login --username AWS --password-stdin ${ECR_URL}
-          docker-compose pull
-          docker-compose up -d
-EOF
+        docker compose pull
+        docker compose up -d
+        EOF
+
       """
     }
   }
